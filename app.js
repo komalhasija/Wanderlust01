@@ -11,6 +11,7 @@ const methodOverride=require("method-override");
 const ejsMate=require("ejs-mate");
 const ExpressError=require("./utils/ExpressError");
 const session=require("express-session");
+const MongoStore=require("connect-mongo");
 const flash=require("connect-flash");
 const passport=require("passport");
 const LocalStrategy=require("passport-local").Strategy;
@@ -28,9 +29,10 @@ main()
 .catch((err)=>{
     console.log(err);
 });
+const url=process.env.ATLASAPI;
 
 async function main(){
-    await mongoose.connect("mongodb://localhost:27017/wanderlust");
+    await mongoose.connect(process.env.ATLASAPI);
 }
 
 app.set("view engine","ejs");
@@ -40,8 +42,19 @@ app.set("view engine","ejs");
 app.use(methodOverride("_method"));
 app.engine("ejs",ejsMate);
 
+const store=MongoStore.create({
+    mongoUrl:url,
+    crypto:{
+        secret:process.env.SECRET,
+    },
+    touchAfter:24*3600,
+});
 
+store.on("error",()=>{
+    console.log("ERROR in MONGO SESSION STORE",err);
+});
 const sessionOption={
+    store,
     secret:process.env.SECRET,
     resave:false,
     saveUninitialized:true,
@@ -51,9 +64,8 @@ const sessionOption={
      httponly:true
     },
 };
-// app.get("/",(req,res)=>{
-//     res.send("Hi,i am root");
-// });
+
+
 
 app.use(session(sessionOption));
 app.use(flash());
