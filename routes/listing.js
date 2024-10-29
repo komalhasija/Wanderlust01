@@ -12,7 +12,8 @@ const{storage}=require("../cloudConfig.js")
 const upload=multer({storage});
 
 // index and create route
-router.route("/")
+router
+.route("/")
 .get(wrapAsync(listingcontroller.index))
 .post(isLoggedIn,upload.single('listing[image]'),validateListing,wrapAsync(listingcontroller.createListing));
 
@@ -23,7 +24,8 @@ router.route("/")
  
  //show route update route // Delete route
  
- router.route("/:id")
+ router
+ .route("/:id")
  .get(wrapAsync(listingcontroller.showListing))
  .put(isLoggedIn,isOwner,upload.single("listing[image]"),validateListing,wrapAsync(listingcontroller.updateListing))
  .delete(isLoggedIn,isOwner,wrapAsync(listingcontroller.destroyListing));
